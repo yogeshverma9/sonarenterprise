@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-sonarqube
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-sonarqube
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.sonarqube.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}-sonarqube
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}-sonarqube
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.sonarqube.securityContext.fsGroup }}
+      containers:
+      - name: sonarqube
+        image: "{{ .Values.sonarqube.image.repository }}:{{ .Values.sonarqube.image.tag }}"
+        imagePullPolicy: {{ .Values.sonarqube.image.pullPolicy }}
+        ports:
+        - containerPort: 9000
+        env:
+            - name: SONAR_JDBC_URL
+              value: "{{ .Values.jdbcOverwrite.url }}"
+            - name: SONAR_JDBC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jdbcOverwrite.existingSecret }}
+                  key: {{ .Values.jdbcOverwrite.usernameKey }}
+            - name: SONAR_JDBC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jdbcOverwrite.existingSecret }}
+                  key: {{ .Values.jdbcOverwrite.passwordKey }}
+            - name: SONAR_ES_BOOTSTRAP_CHECKS_DISABLE
+              value: "true"
+            - name: SONAR_WEB_JAVAOPTS
+              value: "{{ .Values.sonarqube.jvmOpts }}"
