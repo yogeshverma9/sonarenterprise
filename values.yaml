@@ -1,0 +1,76 @@
+# SonarQube Configuration
+sonarqube:
+  image:
+    repository: sonarqube
+    tag: 2025.1-enterprise
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  webContext: /
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+  jvmOpts: "-Xmx1g -Xms512m -XX:+HeapDumpOnOutOfMemoryError"
+  plugins: ""
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
+
+jdbcOverwrite:
+  enabled: true
+  url: "jdbc:postgresql://psql-dot-dotaks-sonarqube-npe-aue-001.postgres.database.azure.com:5432/SonarqbS?currentSchema=sonar"
+  existingSecret: sonarqube-db-secret
+  usernameKey: username
+  passwordKey: password
+
+
+# External PostgreSQL Configuration
+externalPostgresql:
+  enabled: false
+  host: "psql-dot-dotaks-sonarqube-npe-aue-001.postgres.database.azure.com"
+  port: 5432
+  database: "SonarqbS"
+#  username: ""
+#  password: ""
+  existingSecret: sonarqube-db-secret
+  usernameKey: username
+  passwordKey: password
+
+
+# PostgreSQL Subchart Configuration (for internal use)
+postgresql:
+  enabled: false
+  global:
+    postgresql:
+      auth:
+        database: "sonarqube"
+        username: "sonarqube"
+        password: ""
+
+# Service Configuration
+service:
+  type: ClusterIP
+  port: 9000
+  annotations: {}
+
+# Ingress Configuration
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: sonarqube.example.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+# Persistence Configuration
+persistence:
+  enabled: false
+#  storageClass: "azurefile-csi-premium"
+#  accessMode: ReadWriteOnce
+#  size: 10Gi
