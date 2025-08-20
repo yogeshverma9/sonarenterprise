@@ -4,7 +4,7 @@ sonarqube:
     repository: sonarqube
     tag: 2025.1-enterprise
     pullPolicy: IfNotPresent
-  replicaCount: 2
+  replicaCount: 3
   webContext: /
   resources:
     requests:
